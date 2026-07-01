@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autrix · Briefing do Assistente — Consultório Médico</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d1a; --surface: #111427; --card: #161a2e;
+    --border: #252a45; --border-hover: #4a4fcc;
+    --accent: #6c63ff; --accent2: #4a90d9;
+    --accent-glow: rgba(108,99,255,0.2); --accent-soft: rgba(108,99,255,0.08);
+    --text: #e8eaf6; --muted: #6b7280; --success: #34d399;
+    --tag-bg: rgba(108,99,255,0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    min-height: 100vh; padding: 0 0 80px;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(108,99,255,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 90% 20%, rgba(74,144,217,0.08) 0%, transparent 60%);
+  }
+  .topbar {
+    background: rgba(11,13,26,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border); padding: 16px 32px;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { display: none; }
+  .logo-name {
+    font-family: 'Syne', sans-serif; font-weight: 400; font-size: 18px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.9);
+  }
+  .beta-badge { display: none; }
+  .topbar-right { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .progress-bar { height: 2px; background: var(--border); position: sticky; top: 69px; z-index: 99; }
+  .progress-fill {
+    height: 100%; background: linear-gradient(to right, var(--accent), var(--accent2));
+    width: 0%; transition: width 0.4s ease; box-shadow: 0 0 10px var(--accent);
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 52px 24px 0; }
+  .hero { margin-bottom: 52px; animation: fadeUp 0.6s ease both; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--tag-bg); border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 20px; padding: 6px 14px; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+    font-weight: 500; margin-bottom: 20px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 300; line-height: 1.1; margin-bottom: 16px; letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #e8eaf6 30%, #6c63ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 540px; }
+  .plain-note {
+    margin-top: 22px; background: rgba(52,211,153,0.06);
+    border: 1px solid rgba(52,211,153,0.2); border-radius: 12px;
+    padding: 14px 18px; font-size: 13px; color: #a7e8cf; line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .plain-note span:first-child { font-size: 16px; }
+  .steps-nav { display: flex; gap: 6px; margin-bottom: 36px; flex-wrap: wrap; animation: fadeUp 0.6s 0.1s ease both; }
+  .step-dot { width: 28px; height: 4px; border-radius: 2px; background: var(--border); transition: all 0.3s; cursor: pointer; }
+  .step-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .step-dot.done { background: var(--success); }
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; animation: fadeUp 0.5s ease both; }
+  .section-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--accent-soft); border: 1px solid rgba(108,99,255,0.25);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+  }
+  .section-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px; margin-bottom: 16px; transition: border-color 0.3s, box-shadow 0.3s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .card:focus-within { border-color: var(--border-hover); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .card.legal { border-color: rgba(248,113,113,0.35); background: linear-gradient(180deg, rgba(248,113,113,0.05), var(--card)); }
+  .card.legal:focus-within { border-color: rgba(248,113,113,0.6); box-shadow: 0 0 0 3px rgba(248,113,113,0.18); }
+  .q-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+  .q-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent-soft); border: 1px solid rgba(108,99,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+    color: var(--accent); flex-shrink: 0; margin-top: 2px;
+  }
+  .card.legal .q-num { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.35); color: #f87171; }
+  .q-text { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.5; flex: 1; }
+  .q-tags { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tag { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
+  .tag-id  { background: rgba(168,157,255,0.12); color: #a89dff; border: 1px solid rgba(168,157,255,0.25); }
+  .tag-at  { background: rgba(74,144,217,0.10);  color: #4a90d9; border: 1px solid rgba(74,144,217,0.20); }
+  .tag-img { background: rgba(93,223,230,0.10);  color: #5DDFE6; border: 1px solid rgba(93,223,230,0.22); }
+  .tag-lim { background: rgba(245,158,11,0.10);  color: #f5b740; border: 1px solid rgba(245,158,11,0.22); }
+  .tag-cfm { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.28); }
+  textarea, input[type="text"] {
+    width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 300; padding: 14px 16px; resize: vertical;
+    transition: border-color 0.2s, background 0.2s; outline: none; min-height: 90px;
+  }
+  input[type="text"] { min-height: unset; }
+  textarea:focus, input[type="text"]:focus { border-color: var(--accent); background: rgba(108,99,255,0.04); }
+  textarea::placeholder, input::placeholder { color: #3a3f5c; }
+  .hint { font-size: 12px; color: #4a4f6a; margin-top: 8px; line-height: 1.5; display: flex; gap: 6px; }
+  .hint::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+  .card.legal .hint::before { color: #f87171; }
+  .divider { height: 1px; background: linear-gradient(to right, var(--accent), transparent); opacity: 0.2; margin: 36px 0 28px; }
+  .btn-generate {
+    width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px; color: white; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px; letter-spacing: 0.05em; cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(108,99,255,0.35); margin-top: 36px;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent; min-height: 56px;
+  }
+  .btn-generate:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,99,255,0.5); }
+  .btn-generate:active { transform: translateY(0); }
+  #resultado { display: none; margin-top: 40px; animation: fadeUp 0.5s ease both; }
+  .result-card { background: var(--card); border: 1px solid rgba(108,99,255,0.3); border-radius: 14px; padding: 28px; box-shadow: 0 0 40px rgba(108,99,255,0.1); }
+  .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .result-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--success); display: flex; align-items: center; gap: 8px; }
+  .result-title::before { content: '✓'; width: 22px; height: 22px; background: rgba(52,211,153,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .btn-copy { background: var(--accent-soft); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 18px; cursor: pointer; transition: all 0.2s; }
+  .btn-copy:hover { background: rgba(108,99,255,0.15); }
+  .btn-copy.copied { color: var(--success); border-color: rgba(52,211,153,0.4); background: rgba(52,211,153,0.08); }
+  #output-text { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-size: 13px; line-height: 1.8; color: #c5c8e8; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; }
+  .copy-note { font-size: 12px; color: var(--muted); margin-top: 14px; text-align: center; }
+  .tech-note { background: linear-gradient(180deg, rgba(108,99,255,0.06), var(--card)); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 14px; padding: 26px 28px; margin-top: 8px; animation: fadeUp 0.5s ease both; }
+  .tn-label { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .tech-note h3 { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px; color: var(--text); line-height: 1.4; margin-bottom: 10px; }
+  .tech-note .tn-intro { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 18px; }
+  .tn-laws { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+  .tn-laws li { display: flex; gap: 10px; font-size: 13px; line-height: 1.6; color: #c5c8e8; }
+  .tn-laws li::before { content: '§'; color: var(--accent); font-weight: 700; flex-shrink: 0; font-family: 'Syne', sans-serif; }
+  .tn-laws li strong { color: var(--text); font-weight: 500; }
+  .tn-safe { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.22); border-radius: 10px; padding: 13px 15px; font-size: 12.5px; color: #f0b6b6; line-height: 1.6; display: flex; gap: 9px; align-items: flex-start; }
+  .tn-safe span:first-child { flex-shrink: 0; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">A</div>
+    <div class="logo-name">AUTRIX</div>
+    <span class="beta-badge">Beta</span>
+  </div>
+  <div class="topbar-right">Briefing · Consultório Médico</div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Saúde · Medicina</div>
+    <h1>Briefing do Assistente<br>Consultório Médico</h1>
+    <p class="hero-sub">Para médicos e clínicas. O assistente organiza agendamentos, responde dúvidas sobre o consultório e acolhe o paciente — sem nunca substituir a consulta.</p>
+    <div class="plain-note">
+      <span>🩺</span>
+      <span><strong style="color:#fff;font-weight:500">Importante:</strong> este assistente nunca diagnostica, indica remédio ou interpreta exame. Ele cuida do atendimento — agenda, dúvidas e acolhimento — e toda questão de saúde é direcionada à consulta. Responda pensando no dia a dia do seu consultório.</span>
+    </div>
+  </div>
+
+  <div class="steps-nav" id="stepsNav"></div>
+
+  <!-- BLOCO 1 -->
+  <div class="section-header" style="animation-delay:0.1s">
+    <div class="section-icon">🏥</div>
+    <div>
+      <div class="section-title">Identidade do consultório</div>
+      <div class="section-desc">Quem atende e o que o consultório oferece</div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:0.11s">
+    <div class="q-header">
+      <div class="q-num">01</div>
+      <div class="q-text">Como o assistente vai se chamar e ele fala no masculino ou no feminino? (o nome que aparece para o paciente no WhatsApp)</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q1" placeholder="Ex: Vai se chamar Sofia, fala no feminino. / Ou: Dr. Advir, no masculino. É o nome que o paciente vê ao ser atendido..." oninput="updateProgress()"></textarea>
+    <div class="hint">O nome dá rosto ao atendimento. Um nome humano e próximo faz o assistente deixar de parecer "um sistema" e virar parte do consultório.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.12s">
+    <div class="q-header">
+      <div class="q-num">02</div>
+      <div class="q-text">Qual é o nome do(a) médico(a), a especialidade registrada no CRM (e o RQE, se houver) e como o assistente deve apresentá-lo(a)?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q2" placeholder="Ex: Dra. Ana Costa, dermatologista (CRM-SP 123456 / RQE 12345). O assistente apresenta como 'consultório da Dra. Ana Costa'..." oninput="updateProgress()"></textarea>
+    <div class="hint">O assistente só pode divulgar a especialidade registrada no CRM. Isso evita problemas com o Conselho e mantém a comunicação correta.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.15s">
+    <div class="q-header">
+      <div class="q-num">03</div>
+      <div class="q-text">Quais são os dados do consultório? Endereço completo, telefone/WhatsApp, site, redes sociais e horários de atendimento.</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q3" placeholder="Ex: Av. Paulista, 1000, sala 50 — São Paulo/SP. WhatsApp (11) 9xxxx. Instagram @dra... Atendimento seg a sex, 8h às 18h..." oninput="updateProgress()"></textarea>
+    <div class="hint">São as respostas mais pedidas. Com esses dados, o assistente nunca informa endereço ou horário errado.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.18s">
+    <div class="q-header">
+      <div class="q-num">04</div>
+      <div class="q-text">Quais consultas, exames ou procedimentos o consultório oferece? Algum gera mais dúvida ou mais procura?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q4" placeholder="Ex: Consultas em dermatologia clínica e estética, procedimentos como botox e preenchimento. O que mais perguntam é sobre os procedimentos estéticos..." oninput="updateProgress()"></textarea>
+    <div class="hint">Conhecer o que mais procuram ajuda o assistente a estar preparado — sempre informando, nunca indicando o que o paciente deve fazer.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.2s">
+    <div class="q-header">
+      <div class="q-num">05</div>
+      <div class="q-text">Qual é o perfil dos seus pacientes? (faixa etária, tipo de caso mais comum)</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q5" placeholder="Ex: A maioria são mulheres de 30 a 55 anos buscando cuidados com a pele. Também atendo casos clínicos encaminhados..." oninput="updateProgress()"></textarea>
+    <div class="hint">Ajuda o assistente a calibrar o tom e a acolher cada pessoa do jeito certo.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOCO 2 -->
+  <div class="section-header" style="animation-delay:0.3s">
+    <div class="section-icon">🎯</div>
+    <div>
+      <div class="section-title">O que o assistente faz</div>
+      <div class="section-desc">A função dele no atendimento</div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:0.35s">
+    <div class="q-header">
+      <div class="q-num">06</div>
+      <div class="q-text">Qual é o papel principal do assistente? Pode marcar mais de um: agendar consultas; tirar dúvidas sobre o consultório; informar convênios e valores; orientar sobre preparo de exames; dar retorno de pós-consulta.</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span></div>
+    <textarea id="q6" placeholder="Ex: O principal é agendar consultas e informar convênios. Também quero que oriente sobre o preparo dos exames..." oninput="updateProgress()"></textarea>
+    <div class="hint">Não tem certo nem errado — é definir para que ele serve. A maioria começa com agendamento e dúvidas sobre o consultório.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.4s">
+    <div class="q-header">
+      <div class="q-num">07</div>
+      <div class="q-text">Quais perguntas mais chegam? (valor da consulta, convênio aceito, horário, localização, "esse caso é com a doutora?", relato de sintomas)</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span></div>
+    <textarea id="q7" placeholder="Ex: Perguntam muito se aceito o convênio X, qual o valor da consulta particular e se atendo determinado problema..." oninput="updateProgress()"></textarea>
+    <div class="hint">Conhecer as perguntas frequentes deixa o assistente preparado para o que aparece todo dia.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.45s">
+    <div class="q-header">
+      <div class="q-num">08</div>
+      <div class="q-text">O que o assistente resolve sozinho e o que ele deve sempre passar para a recepção/secretária?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span><span class="tag tag-lim">Limite</span></div>
+    <textarea id="q8" placeholder="Ex: Dúvidas sobre horário, endereço e convênio ele responde. Agendamento e qualquer relato de sintoma ele passa para a recepção..." oninput="updateProgress()"></textarea>
+    <div class="hint">Essa divisão protege o atendimento: o assistente cuida do simples, e o que envolve saúde ou agenda passa por uma pessoa.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOCO 3 -->
+  <div class="section-header" style="animation-delay:0.5s">
+    <div class="section-icon">📅</div>
+    <div>
+      <div class="section-title">Agendamento e convênios</div>
+      <div class="section-desc">Como marcar e como falar de valores</div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:0.55s">
+    <div class="q-header">
+      <div class="q-num">09</div>
+      <div class="q-text">Como funciona o agendamento? O assistente marca direto na agenda, ou anota o pedido e a recepção confirma? Quais dados ele deve coletar do paciente?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span></div>
+    <textarea id="q9" placeholder="Ex: Ele anota nome, telefone, convênio e o melhor horário, e a recepção confirma. Pede só os dados essenciais, sem detalhes do problema de saúde..." oninput="updateProgress()"></textarea>
+    <div class="hint">Peça apenas o necessário. Dados de saúde são informações sensíveis e devem ser tratados com cuidado — quanto menos detalhe clínico na conversa, melhor.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.6s">
+    <div class="q-header">
+      <div class="q-num">10</div>
+      <div class="q-text">Quais convênios o consultório atende e como o assistente deve responder quem pergunta? Atende particular também?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span></div>
+    <textarea id="q10" placeholder="Ex: Atende os convênios X, Y e Z, e também particular. Se o convênio não for aceito, oferece a opção particular com gentileza..." oninput="updateProgress()"></textarea>
+    <div class="hint">Convênio é uma das primeiras perguntas. Ter a lista certa evita que o paciente marque e descubra depois que não é atendido.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.65s">
+    <div class="q-header">
+      <div class="q-num">11</div>
+      <div class="q-text">O assistente pode informar o valor da consulta particular, ou deve encaminhar para a recepção? Há condições (retorno, pacotes) que ele pode mencionar?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span><span class="tag tag-cfm">Ética CFM</span></div>
+    <textarea id="q11" placeholder="Ex: Pode informar o valor da consulta (R$...) com naturalidade. Retorno em até 30 dias é sem custo. Não menciona pacotes promocionais..." oninput="updateProgress()"></textarea>
+    <div class="hint">As regras do CFM permitem informar preço, desde que de forma sóbria — sem ar de promoção agressiva, sorteio ou "oferta imperdível".</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOCO 4 -->
+  <div class="section-header" style="animation-delay:0.7s">
+    <div class="section-icon">🎭</div>
+    <div>
+      <div class="section-title">Tom e acolhimento</div>
+      <div class="section-desc">Como o assistente fala com o paciente</div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:0.72s">
+    <div class="q-header">
+      <div class="q-num">12</div>
+      <div class="q-text">Como você quer que o assistente fale com o paciente? Acolhedor, profissional, empático, mais formal? Como tratar quem chega ansioso ou preocupado?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-img">Tom & Imagem</span></div>
+    <textarea id="q12" placeholder="Ex: Acolhedor e tranquilizador, mas profissional. Com quem está ansioso, primeiro acolhe e oferece o agendamento o quanto antes..." oninput="updateProgress()"></textarea>
+    <div class="hint">No consultório, o tom certo passa segurança. Acolher sem prometer nada é o equilíbrio que protege médico e paciente.</div>
+  </div>
+
+  <div class="card" style="animation-delay:0.75s">
+    <div class="q-header">
+      <div class="q-num">13</div>
+      <div class="q-text">Tem um jeito de falar, palavras ou expressões que combinam com o consultório? E o que o assistente jamais deve dizer?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-img">Tom & Imagem</span></div>
+    <textarea id="q13" placeholder="Ex: Cumprimentar com 'Olá, seja bem-vindo(a)'. Nunca prometer cura, nunca minimizar uma queixa, nunca usar termos alarmantes..." oninput="updateProgress()"></textarea>
+    <div class="hint">Esses detalhes dão identidade ao atendimento e evitam frases que gerem expectativa errada sobre tratamento ou resultado.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOCO 5 -->
+  <div class="section-header" style="animation-delay:0.8s">
+    <div class="section-icon">🛡️</div>
+    <div>
+      <div class="section-title">Limites e ética</div>
+      <div class="section-desc">O que protege o paciente e o registro do médico</div>
+    </div>
+  </div>
+
+  <div class="card legal" style="animation-delay:0.82s">
+    <div class="q-header">
+      <div class="q-num">14</div>
+      <div class="q-text">Confirmação da regra central: o assistente NUNCA diagnostica, receita, interpreta exames, indica medicamento ou tratamento, nem dá orientação clínica. Diante de qualquer queixa de saúde, ele acolhe e direciona para a consulta. Há mais algum limite que você quer reforçar?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-cfm">Ética CFM</span><span class="tag tag-lim">Limite</span></div>
+    <textarea id="q14" placeholder="Ex: Confirmado. Reforçar também que ele não opina sobre exames já feitos nem sobre conduta de outro médico..." oninput="updateProgress()"></textarea>
+    <div class="hint">Esta é a linha mais importante de todas. Orientação clínica por um assistente é risco para o paciente e infração ética — por isso a regra é absoluta, sem exceção.</div>
+  </div>
+
+  <div class="card legal" style="animation-delay:0.85s">
+    <div class="q-header">
+      <div class="q-num">15</div>
+      <div class="q-text">Se um paciente descrever uma situação de emergência (ex: dor no peito, falta de ar, sangramento intenso), o que o assistente deve fazer?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-cfm">Ética CFM</span></div>
+    <textarea id="q15" placeholder="Ex: Orientar a procurar o pronto-socorro mais próximo ou ligar para o SAMU 192 imediatamente, e não tentar resolver pela conversa..." oninput="updateProgress()"></textarea>
+    <div class="hint">Em emergência, a única resposta segura é direcionar para o atendimento de urgência (pronto-socorro / SAMU 192) na hora. O assistente nunca tenta avaliar a gravidade.</div>
+  </div>
+
+  <div class="card legal" style="animation-delay:0.88s">
+    <div class="q-header">
+      <div class="q-num">16</div>
+      <div class="q-text">Regras de publicidade médica (a Autrix já configura por padrão): o assistente nunca promete ou garante cura/resultado, não usa termos sensacionalistas ("milagroso", "exclusivo") e só fala da especialidade registrada. Sua assessoria tem alguma regra a mais? Quem é o(a) responsável técnico(a) do consultório?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-cfm">Ética CFM</span></div>
+    <textarea id="q16" placeholder="Ex: Responsável técnica: Dra. Ana Costa (CRM-SP 123456). Sem regras adicionais. / Ou: não divulgar fotos de antes e depois nas respostas..." oninput="updateProgress()"></textarea>
+    <div class="hint">O Conselho de Medicina (CFM) tem regras claras de publicidade. A Autrix cuida da parte técnica, mas a palavra final sobre o que pode ser dito é do responsável técnico do consultório.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOCO 6 -->
+  <div class="section-header" style="animation-delay:0.9s">
+    <div class="section-icon">📚</div>
+    <div>
+      <div class="section-title">Informações de apoio</div>
+      <div class="section-desc">O que o assistente usa para responder certo</div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:0.95s">
+    <div class="q-header">
+      <div class="q-num">17</div>
+      <div class="q-text">Quais materiais existem que o assistente pode usar para responder certo? (orientações de preparo de exames, lista de convênios, valores, perguntas frequentes, orientações de pré e pós-procedimento) Descreva ou anexe.</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-id">Identidade</span></div>
+    <textarea id="q17" placeholder="Ex: Tenho um documento com o preparo de cada exame, a tabela de convênios e um FAQ. Posso enviar tudo..." oninput="updateProgress()"></textarea>
+    <div class="hint">Quanto mais informação verdadeira do consultório você der, menos o assistente erra ou inventa uma resposta.</div>
+  </div>
+
+  <div class="card" style="animation-delay:1.0s">
+    <div class="q-header">
+      <div class="q-num">18</div>
+      <div class="q-text">Quais são as perguntas que os pacientes mais fazem, e como você gosta que sejam respondidas?</div>
+    </div>
+    <div class="q-tags"><span class="tag tag-at">Atendimento</span></div>
+    <textarea id="q18" placeholder="Ex: 'Quanto tempo de consulta?' → cerca de 40 min. 'Precisa de pedido médico?' → explico o caminho. 'Atende criança?' → ..." oninput="updateProgress()"></textarea>
+    <div class="hint">Com as respostas prontas, o assistente atende com a naturalidade do seu consultório, sem improviso.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- NOTA TÉCNICA · uso interno da equipe Autrix -->
+  <div class="tech-note">
+    <div class="tn-label"><span>🔧</span> Nota técnica · Equipe Autrix</div>
+    <h3>Normas que devem entrar na base de conhecimento (RAG) do agente</h3>
+    <p class="tn-intro">Médico é profissão regulada pelo CFM. Para o agente se comportar dentro da ética e <strong style="color:var(--text);font-weight:500">nunca inventar uma regra ou uma orientação</strong>, estas normas precisam estar na base — sempre na versão vigente. O agente fundamenta a própria conduta nelas; ele não interpreta norma nem dá parecer (isso é do responsável técnico).</p>
+    <ul class="tn-laws">
+      <li><span><strong>Código de Ética Médica (Resolução CFM nº 2.217/2018)</strong> — conduta e sigilo. Veda oferecer serviço como prêmio/sorteio (art. 71) e identificar paciente (art. 75).</span></li>
+      <li><span><strong>Resolução CFM nº 2.336/2023</strong> — publicidade médica (vigente desde 11/03/2024). Só especialidade registrada (RQE); proíbe promessa/garantia de resultado, sensacionalismo e "milagroso/exclusivo"; permite informar preço de forma sóbria.</span></li>
+      <li><span><strong>Resolução CFM nº 2.314/2022</strong> — telemedicina. Carregar apenas se o consultório oferecer teleconsulta.</span></li>
+      <li><span><strong>Lei nº 13.709/2018 (LGPD)</strong> — dado de saúde é dado sensível (art. 11), com proteção reforçada. Coletar o mínimo e nunca expor detalhe clínico na conversa.</span></li>
+    </ul>
+    <div class="tn-safe">
+      <span>⚠️</span>
+      <span><strong style="color:#f87171;font-weight:600">Regra absoluta:</strong> o agente <strong style="color:#fff;font-weight:500">nunca diagnostica, prescreve, interpreta exame, indica medicamento/tratamento ou dá orientação clínica</strong> — em qualquer queixa de saúde, direciona para consulta; em sinal de emergência, orienta procurar pronto-socorro / SAMU 192 na hora. Isso não é só anti-alucinação: é segurança do paciente e exigência ética. Na dúvida sobre qualquer informação do consultório, consulta a base; se não achar, encaminha para a recepção — nunca responde de cabeça.</span>
+    </div>
+  </div>
+
+  <button class="btn-generate" type="button" id="btnGerar">⚡ Gerar Resumo para Envio</button>
+
+  <div id="resultado">
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-title">Briefing gerado com sucesso</div>
+        <button class="btn-copy" type="button" id="btnCopy">Copiar tudo</button>
+      </div>
+      <pre id="output-text"></pre>
+      <div class="copy-note">Copie o texto acima e envie por WhatsApp ou e-mail para a Autrix.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const total = 18;
+
+  function updateProgress() {
+    let filled = 0;
+    for (let i = 1; i <= total; i++) {
+      if (document.getElementById('q' + i).value.trim().length > 0) filled++;
+    }
+    document.getElementById('progressFill').style.width = ((filled / total) * 100) + '%';
+    const nav = document.getElementById('stepsNav');
+    nav.innerHTML = '';
+    for (let i = 1; i <= total; i++) {
+      const dot = document.createElement('div');
+      const val = document.getElementById('q' + i).value.trim();
+      dot.className = 'step-dot' + (val.length > 0 ? ' done' : '');
+      dot.title = 'Pergunta ' + i;
+      dot.onclick = () => document.getElementById('q' + i).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nav.appendChild(dot);
+    }
+  }
+
+  function gerarResumo() {
+    const labels = [
+      'Nome do assistente (e masculino/feminino)',
+      'Médico, especialidade registrada (CRM/RQE) e apresentação',
+      'Dados do consultório e horários',
+      'Consultas, exames e procedimentos oferecidos',
+      'Perfil dos pacientes',
+      'Papel principal do assistente',
+      'Perguntas que mais chegam',
+      'O que resolve sozinho x o que passa para a recepção',
+      'Como funciona o agendamento e dados a coletar',
+      'Convênios atendidos e atendimento particular',
+      'Valores de consulta (informar ou encaminhar)',
+      'Tom de voz e acolhimento ao paciente',
+      'Jeito de falar e o que jamais dizer',
+      'Limite central — nunca diagnostica nem prescreve',
+      'Triagem de emergência',
+      'Regras de publicidade médica (CFM) e responsável técnico',
+      'Materiais para a base de conhecimento (preparo, FAQ)',
+      'Perguntas mais comuns e respostas'
+    ];
+
+    let texto = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    texto += '   AUTRIX · BRIEFING DO ASSISTENTE\n';
+    texto += '   CONSULTÓRIO MÉDICO\n';
+    texto += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    for (let i = 1; i <= total; i++) {
+      const val = document.getElementById('q' + i).value.trim();
+      texto += `[${String(i).padStart(2,'0')}] ${labels[i-1]}\n`;
+      texto += val ? val : '(não respondido)';
+      texto += '\n\n';
+    }
+
+    texto += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    texto += 'Gerado via Autrix · autrix.com.br\n';
+
+    document.getElementById('output-text').textContent = texto;
+    const resultado = document.getElementById('resultado');
+    resultado.style.display = 'block';
+    setTimeout(() => { resultado.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
+  }
+
+  function copiarTexto() {
+    const text = document.getElementById('output-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btnCopy');
+      btn.textContent = '✓ Copiado!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar tudo'; btn.classList.remove('copied'); }, 2500);
+    });
+  }
+
+  updateProgress();
+  document.getElementById('btnGerar').addEventListener('click', gerarResumo);
+  document.getElementById('btnCopy').addEventListener('click', copiarTexto);
+</script>
+</body>
+</html>
